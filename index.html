@@ -26,9 +26,11 @@
     filter:drop-shadow(0 8px 10px rgba(120,40,70,.25));
     transition:opacity .25s, transform .25s; pointer-events:none;
   }
-  #drum.show { opacity:1; transform:scale(1) rotate(-6deg); }
+  #drum.show { left:0; bottom:0; width:100%; opacity:1; transform:scale(1); }
   #drum.hit { animation:hit .12s ease-in-out infinite alternate; }
-  @keyframes hit { from{transform:scale(1) rotate(-6deg) translateY(0)} to{transform:scale(1.05) rotate(-3deg) translateY(4px)} }
+  #drum.hard { animation-duration:.07s; }
+  @keyframes hit { from{transform:scale(1) rotate(-2deg) translateY(0)} to{transform:scale(1.04) rotate(2deg) translateY(6px)} }
+  #stage.rolling #box { display:none; }
   #box {
     width:100%; cursor:pointer; filter:drop-shadow(0 14px 18px rgba(120,40,70,.28));
     animation:bob 1.6s ease-in-out infinite;
@@ -145,7 +147,7 @@
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     ctx.resume();
     hint.textContent = '과연... 뭐가 들어있을까요?! 🥁';
-    box.classList.add('shake');
+    document.getElementById('stage').classList.add('rolling');
     drum.classList.add('show', 'hit');
 
     const T = 3.2;               // drum roll length (s)
@@ -167,7 +169,7 @@
       const el = (performance.now() - startMs) / 1000;
       if (el >= T) return;
       drumtext.textContent = words.slice(0, (w++ % words.length) + 1).join('');
-      if (el > T * 0.6) box.classList.add('hard');
+      if (el > T * 0.6) drum.classList.add('hard');
       setTimeout(tick, 150 - (el / T) * 90);
     })();
 
