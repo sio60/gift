@@ -75,54 +75,7 @@
   const drumtext = document.getElementById('drumtext');
   const flash = document.getElementById('flash');
   const scare = document.getElementById('scare');
-  let started = false, ctx;
-
-  // --- synthesized sounds (no audio files) ---
-  function noiseBuf(sec) {
-    const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate);
-    const d = b.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    return b;
-  }
-  function snare(t, vol) {
-    const n = ctx.createBufferSource(); n.buffer = noiseBuf(0.15);
-    const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1200;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-    n.connect(f).connect(g).connect(ctx.destination); n.start(t); n.stop(t + 0.15);
-    const o = ctx.createOscillator(); o.type = 'triangle';
-    o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(120, t + 0.08);
-    const og = ctx.createGain();
-    og.gain.setValueAtTime(vol * 0.6, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
-    o.connect(og).connect(ctx.destination); o.start(t); o.stop(t + 0.1);
-  }
-  function tom(t, vol) {
-    const o = ctx.createOscillator(); o.type = 'sine';
-    o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(60, t + 0.25);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.32);
-  }
-  function boom(t) {
-    // big pop: noise burst + sub drop + cymbal crash
-    const n = ctx.createBufferSource(); n.buffer = noiseBuf(1.5);
-    const f = ctx.createBiquadFilter(); f.type = 'lowpass';
-    f.frequency.setValueAtTime(6000, t); f.frequency.exponentialRampToValueAtTime(300, t + 1.2);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(1.0, t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
-    n.connect(f).connect(g).connect(ctx.destination); n.start(t); n.stop(t + 1.5);
-    const o = ctx.createOscillator(); o.type = 'sine';
-    o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(30, t + 0.6);
-    const og = ctx.createGain();
-    og.gain.setValueAtTime(1.0, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
-    o.connect(og).connect(ctx.destination); o.start(t); o.stop(t + 0.85);
-    // screechy sting
-    const s = ctx.createOscillator(); s.type = 'sawtooth';
-    s.frequency.setValueAtTime(900, t); s.frequency.linearRampToValueAtTime(1400, t + 0.9);
-    const sg = ctx.createGain();
-    sg.gain.setValueAtTime(0.25, t); sg.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
-    s.connect(sg).connect(ctx.destination); s.start(t); s.stop(t + 1.25);
-  }
+  let started = false;
 
   const words = ['두', '구', '두', '구', '두', '구', '두', '굳'];
 
@@ -144,23 +97,11 @@
 
   function start() {
     if (started) return; started = true;
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    ctx.resume();
     hint.textContent = '과연... 뭐가 들어있을까요?! 🥁';
     document.getElementById('stage').classList.add('rolling');
     drum.classList.add('show', 'hit');
 
     const T = 3.2;               // drum roll length (s)
-    const t0 = ctx.currentTime + 0.05;
-    let t = t0, gap = 0.11, i = 0;
-    while (t < t0 + T) {
-      const p = (t - t0) / T;
-      snare(t, 0.25 + p * 0.55);
-      if (i % 4 === 0) tom(t, 0.5 + p * 0.4);
-      gap = 0.11 - p * 0.07;      // speeds up
-      t += gap; i++;
-    }
-    boom(t0 + T + 0.05);
 
     // text: 두구두구두굳...
     let w = 0;
