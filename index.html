@@ -122,7 +122,6 @@
       drum.classList.remove('show');
       setTimeout(() => {
         scare.classList.add('on');
-        if (navigator.vibrate) navigator.vibrate([200, 80, 300]);
       }, 120);
     }, (T + 0.05) * 1000);
   }
